@@ -19,6 +19,7 @@ public class DrawActivity extends AppCompatActivity {
         drawView = (DrawingView)findViewById(R.id.drawing);
         LinearLayout paintLayout = (LinearLayout)findViewById(R.id.paintLayout);
         currentColor = (ImageButton)paintLayout.getChildAt(0);
+        paintClicked(currentColor);
         currentColor.setImageDrawable(getResources().getDrawable(R.drawable.paint_pressed));
     }
 

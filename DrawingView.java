@@ -10,6 +10,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Created by ReverendCode on 4/10/17.
  */
@@ -18,9 +22,10 @@ public class DrawingView extends View {
 
     private Path drawPath;
     private Paint drawPaint, canvasPaint;
-    private int paintColor = 0xff660000;
+    private int paintColor = 0xff000000;
     private Canvas drawCanvas;
     private Bitmap canvasBitmap;
+    private HashMap<Path,Paint> pathList;
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context,attrs);
@@ -29,13 +34,8 @@ public class DrawingView extends View {
     private void setupDrawing() {
         //get drawing area setup for interaction
         drawPath = new Path();
-        drawPaint = new Paint();
-        drawPaint.setColor(paintColor);
-        drawPaint.setAntiAlias(true);
-        drawPaint.setStrokeWidth(20);
-        drawPaint.setStyle(Paint.Style.STROKE);
-        drawPaint.setStrokeJoin(Paint.Join.ROUND);
-        drawPaint.setStrokeCap(Paint.Cap.ROUND);
+        pathList = new HashMap<>();
+        drawPaint = setupPaint(paintColor);
         canvasPaint = new Paint(Paint.DITHER_FLAG);
     }
 
@@ -51,6 +51,8 @@ public class DrawingView extends View {
     protected void onDraw(Canvas canvas) {
         //draw stuff
         canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
+//        for each path in my stack, call canvas.drawPath()
+
         canvas.drawPath(drawPath, drawPaint);
     }
 
@@ -61,6 +63,7 @@ public class DrawingView extends View {
         float touchY = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                drawPath = new Path();
 //                This appears to move the start of the line to the location the finger starts
                 drawPath.moveTo(touchX,touchY);
                 break;
@@ -71,7 +74,10 @@ public class DrawingView extends View {
                 break;
             case MotionEvent.ACTION_UP:
 //                This sends the drawn path to the actual canvas??
+//                push to the stack, and then draw?
+                pathList.put(drawPath, drawPaint);
                 drawCanvas.drawPath(drawPath,drawPaint);
+
                 break;
             default:
                 return false;
@@ -79,9 +85,21 @@ public class DrawingView extends View {
         invalidate(); //this causes onDraw() to execute
         return true;
     }
+
+    public Paint setupPaint(int paintColor) {
+        drawPaint = new Paint();
+        drawPaint.setColor(paintColor);
+        drawPaint.setAntiAlias(true);
+        drawPaint.setStrokeWidth(20);
+        drawPaint.setStyle(Paint.Style.STROKE);
+        drawPaint.setStrokeJoin(Paint.Join.ROUND);
+        drawPaint.setStrokeCap(Paint.Cap.ROUND);
+        return drawPaint;
+    }
     public void setColor(String newColor) {
         invalidate();
+        drawPath = new Path();
         paintColor = Color.parseColor(newColor);
-        drawPaint.setColor(paintColor);
+        drawPaint = setupPaint(paintColor);
     }
 }
